@@ -1,0 +1,56 @@
+#!/bin/bash
+if [ $# -lt 2 ]
+then
+	echo "Usage:
+        eeprom net show ip
+        eeprom net show netmask
+        eeprom net show gateway
+        eeprom net show dns
+        eeprom net show nfs
+        eeprom net set ip <ip-addr>
+        eeprom net set netmask <mask-ip>
+        eeprom net set gateway <gayway-ip>
+        eeprom net set dns <dns-ip>
+        eeprom net set nfs <nfs-ip>
+        eeprom flag set <nbit>
+        eeprom flag clr <nbit>
+        eeprom flag get <nbit>"
+	exit
+fi
+if [ "$1" == "net" ]
+then 
+	if [ "$2" == "show" ]
+	then
+		case $3 in
+			ip)
+				grep "eth0" ./reconfigip | awk 'BEGIN {FS=" "} {for(i=1; i <= NF;i++) if($i == "eth0") print $(i+1)}'
+			;;
+			netmask)
+				grep "netmask" ./reconfigip | awk 'BEGIN {FS=" "} {for(i=1; i <= NF;i++) if($i == "netmask") print $(i+1)}'
+			;;
+			*)
+				echo "no support $3"
+			;;	
+		esac
+	
+	elif [ "$2" == "set" ]
+	then
+		case $3 in
+			ip)
+				sed -i 's/\(.*\)eth0\(.*\)netmask\(.*\)/\1eth0 '$4' netmask\3/' ./reconfigip 
+			;;
+			netmask)
+				 sed -i 's/\(.*\)netmask\(.*\)/\1netmask '$4'/' ./reconfigip 
+			;;
+			*)
+				echo "no support $3"
+			;;	
+		esac
+	else
+		echo "no support $2"
+	fi
+#sed -i 's/\(.*\)eth0\(.*\)netmask\(.*\)/\1eth0 192.168.1.132 netmask 255.255.255.0/g' ./reconfigip 
+else
+	echo "no support"
+fi
+

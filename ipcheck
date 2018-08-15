@@ -1,0 +1,23 @@
+#!/bin/bash
+
+
+ip_check(){
+if [ $# -lt 1 ]
+then
+	return "1"
+else
+	echo $1 | awk 'BEGIN {FS="."} {if(NF < 4) exit NF; else for(i=1; i <= NF; i++) if($i>=255 || $i=="") exit 2}'
+fi
+
+}
+
+
+ip_check $1
+ipisok=$?
+
+
+echo $ipisok
+
+gw=`echo $1 | awk 'BEGIN {FS="."} {printf("%d.%d.%d.1", $1,$2,$3)}'`
+
+echo $gw

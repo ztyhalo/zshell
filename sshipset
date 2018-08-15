@@ -1,0 +1,48 @@
+#!/bin/bash
+if [ $# -lt 1 ]
+then
+	echo "para too little!"
+	exit
+fi
+
+IPADDR=/home/zty/.ssh/config
+
+ip_check(){
+if [ $# -lt 1 ]
+then
+	return 1
+else
+	echo $1 | awk 'BEGIN {FS="."} {if(NF < 4) exit NF; else for(i=1; i <= NF; i++) if($i>255 || $i=="") exit 2}'
+fi
+
+}
+
+get_num(){
+
+	num=`grep -n "$1" $IPADDR | awk -F: '{print $1}'`
+	return $num
+}
+
+if [ $# -eq 1 ]
+then
+	
+	grep -A 3 "$1" $IPADDR
+
+	exit 0
+fi
+
+ip_check $2
+if [ $? -gt 0 ]
+then
+	echo "ip addr err!!"
+	exit 1
+fi
+
+get_num $1
+numval=$?
+let numval++
+
+sed -i ''$numval's/\(.*\)HostName\(.*\)/\1HostName '$2'/' $IPADDR
+
+	
+

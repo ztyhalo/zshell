@@ -1,0 +1,20 @@
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet static
+address 192.168.6.6
+netmask 255.255.255.0
+gateway 192.168.6.1
+
+auto can0
+iface can0 inet manual
+	pre-up /sbin/ip link set $IFACE type can bitrate 100000 triple-sampling on restart-ms 20
+	up /sbin/ifconfig $IFACE up
+	down /sbin/ifconfig $IFACE down
+
+auto can1
+iface can1 inet manual
+        pre-up /sbin/ip link set $IFACE type can bitrate 100000 triple-sampling on restart-ms 20
+        up /sbin/ifconfig $IFACE up
+        down /sbin/ifconfig $IFACE down

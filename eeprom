@@ -1,0 +1,77 @@
+#!/bin/bash
+if [ $# -lt 2 ]
+then
+	echo "Usage:
+        eeprom net show ip
+        eeprom net show netmask
+        eeprom net show gateway
+        eeprom net show dns
+        eeprom net show nfs
+        eeprom net set ip <ip-addr>
+        eeprom net set netmask <mask-ip>
+        eeprom net set gateway <gayway-ip>
+        eeprom net set dns <dns-ip>
+        eeprom net set nfs <nfs-ip>
+        eeprom flag set <nbit>
+        eeprom flag clr <nbit>
+        eeprom flag get <nbit>"
+	exit
+fi
+
+IPADDR=./interfaces
+
+ip_check(){
+if [ $# -lt 1 ]
+then
+	return 1
+else
+	echo $1 | awk 'BEGIN {FS="."} {if(NF < 4) exit NF; else for(i=1; i <= NF; i++) if($i>255 || $i=="") exit 2}'
+fi
+
+}
+
+if [ "$1" == "net" ]
+then 
+	if [ "$2" == "show" ]
+	then
+		case $3 in
+			ip)
+				grep "address" ${IPADDR} | awk 'BEGIN {FS=" "} {print $2}'
+			;;
+			netmask)
+				grep "netmask" ${IPADDR} | awk 'BEGIN {FS=" "} {print $2}'
+			;;
+			*)
+				echo "no support $3"
+			;;	
+		esac
+	
+	elif [ "$2" == "set" ]
+	then
+		case $3 in
+			ip)
+				ip_check $4
+				if [ $? -gt 0 ]
+				then
+					echo "ip addr err!"
+				else
+					sed -i 's/\(.*\)address\(.*\)/\1address '$4'/' ${IPADDR} 
+					gw=`echo $4 | awk 'BEGIN {FS="."} {printf("%d.%d.%d.1", $1,$2,$3)}'`
+					sed -i 's/\(.*\)gateway\(.*\)/\1gateway '$gw'/' ${IPADDR} 
+				fi
+			;;
+			netmask)
+				 sed -i 's/\(.*\)netmask\(.*\)/\1netmask '$4'/' ${IPADDR} 
+			;;
+			*)
+				echo "no support $3"
+			;;	
+		esac
+	else
+		echo "no support $2"
+	fi
+#sed -i 's/\(.*\)eth0\(.*\)netmask\(.*\)/\1eth0 192.168.1.132 netmask 255.255.255.0/g' ./reconfigip 
+else
+	echo "no support"
+fi
+
